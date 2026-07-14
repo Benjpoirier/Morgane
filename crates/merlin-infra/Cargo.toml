@@ -1,0 +1,30 @@
+[package]
+name = "merlin-infra"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+merlin-protocol = { path = "../merlin-protocol" }
+merlin-domain = { path = "../merlin-domain" }
+tokio = { version = "1.52.3", features = ["net", "time", "io-util", "rt", "sync", "macros", "process"] }
+tokio-util = "0.7.18"
+reqwest = { version = "0.13.4", features = ["stream"] }
+image = "0.25.10"
+sha2 = "0.11"
+flate2 = "1"
+futures-util = "0.3"
+tracing = "0.1.44"
+thiserror = "2.0.18"
+dirs = "6.0.0"
+ab_glyph = "0.2.32"
+imageproc = "0.27.0"
+uuid = "1.23.4"
+rusqlite = { version = "0.39", features = ["bundled"] }
+chrono = "0.4.45"
+serde_json = "1.0.150"
+
+[dev-dependencies]
+merlin-mock-device = { path = "../merlin-mock-device" }
+serde_json = "1.0.150"
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "macros"] }

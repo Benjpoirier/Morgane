@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: '--target universal-apple-darwin'
+            rustTargets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+            tauriScript: app/node_modules/.bin/tauri
+          - platform: ubuntu-22.04
+            args: ''
+            rustTargets: ''
+            tauriScript: app/node_modules/.bin/tauri
+          - platform: windows-latest
+            args: ''
+            rustTargets: ''
+            tauriScript: app/node_modules/.bin/tauri.cmd
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          # Doit rester aligné avec le champ "packageManager" de app/package.json
+          version: 10.33.0
+          run_install: false
+
+      - name: Install Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/pnpm-lock.yaml
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rustTargets }}
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libxdo-dev \
+            libssl-dev
+
+      - name: Install frontend dependencies
+        run: pnpm -C app install --frozen-lockfile
+
+      - name: Build and publish release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: .
+          tauriScript: ${{ matrix.tauriScript }}
+          args: ${{ matrix.args }}
+          tagName: v__VERSION__
+          releaseName: 'Morgane v__VERSION__'
+          releaseDraft: true
+          prerelease: false
+          releaseBody: |
+            Application libre de synchronisation de podcasts vers l'enceinte
+            audio pour enfants Merlin. Projet indépendant, non affilié à Bayard /
+            Radio France / La Chouette Radio.
+
+            **⚠️ Bêta** — le contenu de l'enceinte peut être corrompu ; en cas de
+            souci, une resynchronisation avec l'app Merlin officielle répare
+            l'enceinte. Garde ta bibliothèque locale comme référence.
+
+            **FFmpeg** est téléchargé automatiquement au premier lancement s'il
+            n'est pas déjà présent.
+
+            **Binaires non signés** :
+            - macOS : clic droit sur l'app → *Ouvrir* (ou `xattr -dr com.apple.quarantine Morgane.app`).
+            - Windows : SmartScreen → *Informations complémentaires* → *Exécuter quand même*.
