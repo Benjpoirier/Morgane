@@ -1,0 +1,20 @@
+[package]
+name = "merlin-application"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+chrono = "0.4.45"
+merlin-domain = { path = "../merlin-domain" }
+merlin-infra = { path = "../merlin-infra" }
+serde = { version = "1.0.228", features = ["derive"] }
+tokio = { version = "1.52.3", features = ["rt", "macros"] }
+tokio-util = "0.7.18"
+
+[dev-dependencies]
+image = "0.25.10"
+merlin-mock-device = { path = "../merlin-mock-device" }
+serde_json = "1.0.150"
+tokio = { version = "1.52.3", features = ["rt-multi-thread", "macros"] }
+uuid = "1.23.4"

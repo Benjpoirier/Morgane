@@ -1,0 +1,37 @@
+[package]
+name = "merlinsync-tauri"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "merlinsync_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+merlin-protocol = { path = "../crates/merlin-protocol" }
+merlin-domain = { path = "../crates/merlin-domain" }
+merlin-infra = { path = "../crates/merlin-infra" }
+merlin-application = { path = "../crates/merlin-application" }
+
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "macros", "time"] }
+tokio-util = "0.7"
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "6"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[features]
+
+custom-protocol = ["tauri/custom-protocol"]
+
+[dev-dependencies]
+merlin-application = { path = "../crates/merlin-application" }
+serde_json = "1"
